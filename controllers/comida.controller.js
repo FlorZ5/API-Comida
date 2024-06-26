@@ -25,29 +25,16 @@ comidaCtrl.listAllComida=async(req,res)=>{
   }
 };
 
-comidaCtrl.update = async(req,res) =>{
+comidaCtrl.searchComida = async(req,res) =>{
   try {
-    const { id } = req.params;
-    const resp = await comidaModel.findById(id);
-    if(!resp){
-      return messageGeneral(res,404,false,"","Platillo no encontrado");
+    const { key, value } = req.params;
+    const searchValue = new RegExp(value, 'i');
+    const searchKey = key.toLowerCase();
+    const resp = await comidaModel.find({ [searchKey]: searchValue });
+    if (resp.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron platillos.' });
     }
-    await resp.updateOne(req.body);
-    messageGeneral(res,200,true,"","Platillo actualizado!!!");
-  } catch (error) {
-    messageGeneral(res,500,false,"",error.message);
-  }
-};
-
-comidaCtrl.deleteComida = async(req,res) =>{
-  try {
-    const { id } = req.params;
-    const resp = await comidaModel.findById(id);
-    if(!resp){
-      return messageGeneral(res,404,false,"","Platillo no encontrado");
-    }
-    await resp.deleteOne();
-    messageGeneral(res,200,true,"","Platillo eliminado!!!");
+    messageGeneral(res,200,true,resp,"Lista de platillos");
   } catch (error) {
     messageGeneral(res,500,false,"",error.message);
   }
@@ -58,7 +45,8 @@ comidaCtrl.updateComida = async(req,res) =>{
     const { key, value } = req.params;
     const actualizaciones = req.body;
     const searchValue = new RegExp(value, 'i');
-    const resp = await comidaModel.findOneAndUpdate({ [key]: searchValue }, actualizaciones, { new: true });
+    const searchKey = key.toLowerCase();
+    const resp = await comidaModel.findOneAndUpdate({ [searchKey]: searchValue }, actualizaciones, { new: true });
     if(!resp){
       return messageGeneral(res,404,false,"","Platillo no encontrado");
     }
@@ -73,7 +61,8 @@ comidaCtrl.updateComidaMany = async(req,res) =>{
     const { key, value } = req.params;
     const actualizaciones = req.body;
     const searchValue = new RegExp(value, 'i');
-    const resp = await comidaModel.updateMany({ [key]: searchValue }, actualizaciones);
+    const searchKey = key.toLowerCase();
+    const resp = await comidaModel.updateMany({ [searchKey]: searchValue }, actualizaciones);
     if(resp.matchedCount === 0){
       return messageGeneral(res,404,false,"","Platillo no encontrado");
     }
@@ -83,16 +72,32 @@ comidaCtrl.updateComidaMany = async(req,res) =>{
   }
 };
 
-
-comidaCtrl.searchComida = async(req,res) =>{
+comidaCtrl.deleteComida = async(req,res) =>{
   try {
     const { key, value } = req.params;
-    const searchValue = new RegExp(value, 'i');
-    const resp = await comidaModel.find({ [key]: searchValue });
-    if (resp.length === 0) {
-      return res.status(404).json({ message: 'No se encontraron platillos.' });
+    const keyM = key.toLowerCase();
+    const query = {};
+    query[keyM] = new RegExp(value, 'i'); // 'i' hace que la búsqueda no sea sensible a mayúsculas/minúsculas
+    const resp = await comidaModel.findOneAndDelete(query);
+    if(resp.deletedCount === 0){
+      return messageGeneral(res,404,false,"","Platillo no encontrado");
     }
-    messageGeneral(res,200,true,resp,"Lista de platillos");
+    messageGeneral(res,200,true,"","Platillo eliminado!!!");
+  } catch (error) {
+    messageGeneral(res,500,false,"",error.message);
+  }
+};
+
+comidaCtrl.deleteComidaMany = async(req,res) =>{
+  try {
+    const { key, value } = req.params;
+    const searchValue = new RegExp(value, 'i');// 'i' hace que la búsqueda no sea sensible a mayúsculas/minúsculas
+    const searchKey = key.toLowerCase();
+    const resp = await comidaModel.deleteMany({ [searchKey]: searchValue });
+    if(resp.deletedCount === 0){
+      return messageGeneral(res,404,false,"","Platillo no encontrado");
+    }
+    messageGeneral(res,200,true,"","Platillo eliminado!!!");
   } catch (error) {
     messageGeneral(res,500,false,"",error.message);
   }

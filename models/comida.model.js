@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 const {Schema, model} = mongoose;
 
 const comidaSchema = new Schema(
-    {
+    {                                                                                                                                                                                                                                                                                                                        
         nombre: 
         { 
             type: String, 
