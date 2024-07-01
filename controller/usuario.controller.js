@@ -9,6 +9,10 @@ const userCtrl = {};
 userCtrl.register = async (req, res) => {
   try {
     const data = req.body;
+
+    if (!data.nombre || !data.apellido || !data.correo || !data.password) {
+      return messageGeneral(res, 400, false, "", "Todos los campos son obligatorios.");
+    }
     
     // Estas son las validaciones
     const valName_LastName = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{3,40}$/;
@@ -48,6 +52,10 @@ userCtrl.register = async (req, res) => {
 userCtrl.login = async (req, res) => {
   try {
     const data = req.body;
+
+    if (!data.correo || !data.password) {
+      return messageGeneral(res, 400, false, "", "Todos los campos son obligatorios.");
+    }
 
     // Validaciones
     const valEmail = /^[A-Za-z0-9._-]{1,25}@[A-Za-z0-9._-]{1,25}$/;
