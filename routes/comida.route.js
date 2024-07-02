@@ -1,6 +1,6 @@
 import {Router} from "express";
 const route = Router();
-import comidaCtrl from "../controllers/comida.controller.js";
+import comidaCtrl from "../controller/comida.controller.js";
 import { authMiddleware } from '../middlewares/Auth.js';
 
 route.post('/', authMiddleware, comidaCtrl.createComida);
