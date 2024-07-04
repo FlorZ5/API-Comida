@@ -48,6 +48,7 @@ comidaCtrl.createComida = async (req, res) => {
     const maxCodigo = await comidaModel.findOne().sort('-codigo').select('codigo');
     const codigo = maxCodigo ? maxCodigo.codigo + 1 : 1;
 
+
     const newData = {
       ...data,
       codigo

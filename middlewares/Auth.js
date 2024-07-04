@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
-import messages from '../utils/messages';
+import message from '../utils/messages.js';
+
+const {messageGeneral} = message;
 
 export const authMiddleware = (req, res, next) => {
   // Obtener el token del encabezado Authorization
@@ -7,7 +9,7 @@ export const authMiddleware = (req, res, next) => {
 
   // Verificar si hay token
   if (!token) {
-    return res.status(401).json({ messages: 'Acceso denegado. No hay token válido.' });
+    return res.status(401).json({ messageGeneral: 'Acceso denegado. No hay token válido.' });
   }
 
   try {
@@ -18,6 +20,6 @@ export const authMiddleware = (req, res, next) => {
     req.user = decoded;
     next(); // Continuar con la ejecución de la ruta protegida
   } catch (error) {
-    res.status(401).json({ messages: 'Token no válido.' });
+    res.status(401).json({ messageGeneral: 'Token no válido.' });
   }
 };
