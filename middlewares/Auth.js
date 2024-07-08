@@ -1,11 +1,16 @@
 import jwt from 'jsonwebtoken';
 import message from '../utils/messages.js';
 
-const {messageGeneral} = message;
+const { messageGeneral } = message;
 
 export const authMiddleware = (req, res, next) => {
-  // Obtener el token del encabezado Authorization
-  const token = req.headers.authorization.split(" ")[1]; //Separa el Bearer del token y toma la primera posición.
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ messageGeneral: 'Acceso denegado. No se ha proporcionado ningún token.' });
+  }
+
+  const token = authHeader.split(" ")[1]; //Separa el Bearer del token y toma la primera posición.
 
   // Verificar si hay token
   if (!token) {
