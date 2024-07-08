@@ -10,12 +10,19 @@ const valNombre = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{3,40}$/;
 const valCategoria = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{3,40}$/;
 const valIngredientes = /^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñ\s]{3,40}$/;
 const valDescripcion = /^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñ\s,]{3,100}$/;
-const valPrecio = /^\d+(\.\d{1,2})?$/;
+const valPrecio = /^\d+$/;
 const valCodigo = /^\d{1,6}$/;
 
 comidaCtrl.createComida = async (req, res) => {
   try {
     const data = req.body;
+
+    const allowedFields = ['nombre', 'categoria', 'ingredientes', 'descripcion', 'precio'];
+
+    const invalidFields = Object.keys(data).filter(field => !allowedFields.includes(field));
+    if (invalidFields.length > 0) {
+      return messageGeneral(res, 400, false, "", `Campos no permitidos: ${invalidFields.join(', ')}`);
+    }
 
     //Valida que ningún campo venga vacío
     const requiredFields = ['nombre', 'categoria', 'ingredientes', 'descripcion', 'precio'];
@@ -140,6 +147,11 @@ comidaCtrl.updateComida = async (req, res) => {
     const searchKey = key.toLowerCase();
     let searchValue;
 
+    const camposValidos = ['nombre', 'categoria', 'ingredientes', 'descripcion', 'precio', 'codigo'];
+    if (!camposValidos.includes(searchKey)) {
+      return messageGeneral(res, 400, false, "", "Campo a buscar no válido.");
+    }
+
     if ('codigo' in actualizaciones) {
       return messageGeneral(res, 400, false, "", "El campo código no puede ser actualizado.");
     }
@@ -163,13 +175,19 @@ comidaCtrl.updateComida = async (req, res) => {
         validationKey = valDescripcion;
         searchValue = new RegExp(value, 'i');
         break;
-      case 'precio':
-        validationKey = valPrecio;
-        searchValue = parseFloat(value);
-        if (isNaN(searchValue)) {
-          return messageGeneral(res, 400, false, "", "El valor ingresado para precio no es válido.");
-        }
-        break;
+      case 'codigo':
+        if (!valCodigo.test(value)) {
+           return messageGeneral(res, 400, false, "", "El valor ingresado para código no es válido. Debe ser un número entero positivo.");
+         }
+        searchValue = parseInt(value);
+         break;
+         case 'precio':
+          validationKey = valPrecio;
+          if (!/^\d+$/.test(value)) {
+            return messageGeneral(res, 400, false, "", "El valor ingresado para precio no es válido. Debe ser un número entero positivo.");
+          }
+          searchValue = parseInt(value, 10);
+          break;
       default:
         return messageGeneral(res, 400, false, "", "Campo a actualizar no válido");
     }
@@ -191,13 +209,12 @@ comidaCtrl.updateComida = async (req, res) => {
           case 'descripcion':
             validation = valDescripcion;
             break;
-          case 'precio':
-            const newPrice = parseFloat(actualizaciones[field]);
-            if (isNaN(newPrice)) {
-              return messageGeneral(res, 400, false, "", `El formato ingresado para ${field} es inválido. Debe ser un valor numérico.`);
-            }
-            actualizaciones[field] = newPrice;
-            continue;
+            case 'precio':
+              if (!/^\d+$/.test(actualizaciones[field])) {
+                return messageGeneral(res, 400, false, "", `El formato ingresado para ${field} es inválido. Debe ser un número entero.`);
+              }
+              actualizaciones[field] = parseInt(actualizaciones[field], 10);
+              continue;                       
           default:
             return messageGeneral(res, 400, false, "", `Campo ${field} no válido para actualizar.`);
         }
@@ -229,6 +246,11 @@ comidaCtrl.updateComidaMany = async (req, res) => {
     const searchKey = key.toLowerCase();
     let searchValue;
 
+    const camposValidos = ['nombre', 'categoria', 'ingredientes', 'descripcion', 'precio', 'codigo'];
+    if (!camposValidos.includes(searchKey)) {
+      return messageGeneral(res, 400, false, "", "Campo a buscar no válido.");
+    }
+
     if ('codigo' in actualizaciones) {
       return messageGeneral(res, 400, false, "", "El campo código no puede ser actualizado.");
     }
@@ -252,12 +274,18 @@ comidaCtrl.updateComidaMany = async (req, res) => {
         validationKey = valDescripcion;
         searchValue = new RegExp(value, 'i');
         break;
+      case 'codigo':
+        if (!valCodigo.test(value)) {
+            return messageGeneral(res, 400, false, "", "El valor ingresado para código no es válido. Debe ser un número entero positivo.");
+          }
+        searchValue = parseInt(value);
+        break;
       case 'precio':
-        validationKey = valPrecio;
-        searchValue = parseFloat(value);
-        if (isNaN(searchValue)) {
-          return messageGeneral(res, 400, false, "", "El valor ingresado para precio no es válido.");
-        }
+         validationKey = valPrecio;
+         if (!/^\d+$/.test(value)) {
+           return messageGeneral(res, 400, false, "", "El valor ingresado para precio no es válido. Debe ser un número entero positivo.");
+         }
+        searchValue = parseInt(value, 10);
         break;
       default:
         return messageGeneral(res, 400, false, "", "Campo a actualizar no válido");
@@ -280,13 +308,12 @@ comidaCtrl.updateComidaMany = async (req, res) => {
           case 'descripcion':
             validation = valDescripcion;
             break;
-          case 'precio':
-            const newPrice = parseFloat(actualizaciones[field]);
-            if (isNaN(newPrice)) {
-              return messageGeneral(res, 400, false, "", `El formato ingresado para ${field} es inválido. Debe ser un valor numérico.`);
-            }
-            actualizaciones[field] = newPrice;
-            continue;
+            case 'precio':
+              if (!/^\d+$/.test(actualizaciones[field])) {
+                return messageGeneral(res, 400, false, "", `El formato ingresado para ${field} es inválido. Debe ser un número entero.`);
+              }
+              actualizaciones[field] = parseInt(actualizaciones[field], 10);
+              continue;            
           default:
             return messageGeneral(res, 400, false, "", `Campo ${field} no válido para actualizar.`);
         }
@@ -295,6 +322,11 @@ comidaCtrl.updateComidaMany = async (req, res) => {
           return messageGeneral(res, 400, false, "", `El formato ingresado para ${field} es inválido.`);
         }
       }
+    }
+
+    const existingRecords = await comidaModel.find({ [searchKey]: searchValue });
+    if (existingRecords.length === 0) {
+      return messageGeneral(res, 404, false, "", "Platillo no encontrado");
     }
 
     const resp = await comidaModel.updateMany({ [searchKey]: searchValue }, actualizaciones);
@@ -331,12 +363,12 @@ comidaCtrl.deleteComida = async (req, res) => {
         query[keyM] = new RegExp(value, 'i');
         break;
       case 'precio':
-        const parsedPrecio = parseFloat(value);
-        if (isNaN(parsedPrecio)) {
-          return messageGeneral(res, 400, false, "", "El valor ingresado para precio no es válido.");
+        if (!/^\d+$/.test(value)) {
+          return messageGeneral(res, 400, false, "", "El valor ingresado para precio no es válido. Debe ser un número entero positivo.");
         }
+        const parsedPrecio = parseInt(value, 10);
         query[keyM] = parsedPrecio;
-        break;
+        break; 
       case 'codigo':
         const parsedCodigo = parseInt(value);
         if (isNaN(parsedCodigo)) {
@@ -382,12 +414,11 @@ comidaCtrl.deleteComidaMany = async (req, res) => {
         searchValue = new RegExp(value, 'i');
         break;
       case 'precio':
-        const parsedPrecio = parseFloat(value);
-        if (isNaN(parsedPrecio)) {
-          return messageGeneral(res, 400, false, "", "El valor ingresado para precio no es válido.");
+        if (!/^\d+$/.test(value)) {
+          return messageGeneral(res, 400, false, "", "El valor ingresado para precio no es válido. Debe ser un número entero positivo.");
         }
-        searchValue = parsedPrecio;
-        break;
+        searchValue = parseInt(value, 10);
+        break;        
       case 'codigo':
         const parsedCodigo = parseInt(value);
         if (isNaN(parsedCodigo)) {

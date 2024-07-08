@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const uri = "mongodb+srv://2136000607:Galleta06@cluster0.9pd4gyf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"; // URI de conexión a MongoDB Atlas
+const uri = "mongodb://127.0.0.1:27017/comida";
 
 // Creamos la conexión
 const connectDB = async () => {
