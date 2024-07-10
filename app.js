@@ -33,6 +33,6 @@ app.listen(app.get('Port'), ()=>{
 app.use('/',(req,res)=>{
   res.status(200).json({
     ok:true,
-    message: "Mi primera petición a un servidor NodeJS!!",
+    message: "La URL que has solicitado no existe o no esta disponible.",
   });
 });
